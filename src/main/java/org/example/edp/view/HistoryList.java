@@ -1,16 +1,9 @@
 package org.example.edp.view;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
-import org.example.edp.model.DatabaseService;
-import org.example.edp.service.EventBus;
-import org.example.edp.event.ItemSavedEvent;
-import org.example.edp.event.Subscribe;
-
-import java.util.List;
 
 public class HistoryList extends VBox {
 
@@ -41,36 +34,14 @@ public class HistoryList extends VBox {
 
         this.getChildren().addAll(filterBox, scrollPane);
 
-        filterBox.setOnAction(e -> loadData());
-
-        loadData();
-
-        EventBus.getInstance().register(this);
     }
 
-    @Subscribe
-    public void onItemSaved(ItemSavedEvent event) {
-        System.out.println("HistoryList received ItemSavedEvent! Refreshing data.");
-        Platform.runLater(this::loadData);
+    public ComboBox<String> getFilterBox() {
+        return filterBox;
     }
 
-    public void loadData() {
-        cardsContainer.getChildren().clear();
-
-        String selected = filterBox.getValue().toLowerCase();
-        String typeFilter = switch (selected) {
-            case "fakty" -> "fact";
-            case "cytaty" -> "quote";
-            default -> "all";
-        };
-
-        List<FactCardData> entries = DatabaseService.loadFavoritesAsCards(typeFilter);
-
-        for (FactCardData entry : entries) {
-            cardsContainer.getChildren().add(
-                    new FactCard(entry.type(), entry.content(), entry.author())
-            );
-        }
+    public VBox getCardsContainer() {
+        return cardsContainer;
     }
 
     public record FactCardData(String type, String content, String author) {}
